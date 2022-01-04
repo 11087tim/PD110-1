@@ -1,43 +1,40 @@
-
-
-#ifndef PD110_1_FP_PLAYER_H
-#define PD110_1_FP_PLAYER_H
-
-#include <iostream>
+//
+// Created by Nina on 2022/1/2.
+//
 #include <SFML/Graphics.hpp>
+#include <SFML/System.hpp>
 
-class player {
-    private:
-        sf::Texture player_texture;
-        sf::Sprite player_sprite;
+#ifndef HELLOSFML_PLAYER_H
+#define HELLOSFML_PLAYER_H
 
-    public:
-        player() {
-            //default
-        }
-        player(std::string ImgDirectory){
-            if(!player_texture.loadFromFile(ImgDirectory)){
-                std::cout << "player_picture failed.";
-            }
-            player_sprite.setTexture(player_texture);
-        }
-        void playerShow(sf::RenderWindow &window){
-            window.draw(player_sprite);
-        }
-        void playerMove(char direction, float movingSpeed){
-            if(direction == 'u'){
-                player_sprite.move(0, -movingSpeed);
+class Player
+{
+private:
+    sf::Sprite sprite;
+    sf::Texture texture;
+    int character; //1 for Jie, 2 for CMK
+    float gravity;
+    float movementspeed;
+    float directionY;
+    float jumpspeed;
 
-            }else if(direction == 'd'){
-                player_sprite.move(0 , movingSpeed);
-            }else if(direction == 'l'){
-                player_sprite.move(-movingSpeed , 0);
-            }else if(direction == 'r'){
-                player_sprite.move(movingSpeed , 0);
-            }
-        }
+    //private functions
+    void initTexture(int character);
+    void initSprite(int character, sf::RenderTarget& target);
 
+public:
+    Player(int character, sf::RenderTarget& target);
+    ~Player();
+
+    const bool checkCollision();
+    //functions
+    sf:: FloatRect getGlobalBounds();
+    sf::Vector2f getPosition();
+    void move(const float dirX, const float dirY);
+    void jump();
+    void velocityChange(const sf:: RenderTarget& target);
+    void updateWindowBoundCollision(const sf::RenderTarget& target);
+    void update(const sf:: RenderTarget& target);
+    void render(sf::RenderTarget& target);
 };
-
-
-#endif //PD110_1_FP_PLAYER_H
+#endif //HELLOSFML_PLAYER_H
