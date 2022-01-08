@@ -10,6 +10,7 @@ Ball::Ball()
     this-> bounceVelocity = sf:: Vector2f(5.f, -10.f);
     this-> gravity = .1f;
     this-> rotateAngle = 0.25f;
+    this-> ballOnGround = false;
     this-> initTexture();
     this-> initSprite();
 }
@@ -34,7 +35,7 @@ void Ball::initSprite()
 
     //resize
     this-> sprite.scale(0.1f, 0.1f);
-    this-> sprite.setPosition(200.f, 350.f);
+    this-> sprite.setPosition(200.f, -10.f);
 }
  void Ball:: updateWindowBoundsCollision(const sf::RenderTarget& target)
 {
@@ -53,12 +54,12 @@ void Ball::initSprite()
 //        this-> rotateAngle = -0.5f;
     }
     //Top (Ball should fly and fall)
-    if(this->sprite.getGlobalBounds().top + this->sprite.getGlobalBounds().height * 3 <= 0.f)
+    if(this->sprite.getGlobalBounds().top + this->sprite.getGlobalBounds().height * 2 <= 0.f)
     {
         if(bounceVelocity.x > .0f)
-            this-> sprite.setPosition(this->sprite.getGlobalBounds().left + this->sprite.getGlobalBounds().width/4, -15.f);
+            this-> sprite.setPosition(this->sprite.getGlobalBounds().left + this->sprite.getGlobalBounds().width/4, -5.f);
         else
-            this-> sprite.setPosition(this->sprite.getGlobalBounds().left - this->sprite.getGlobalBounds().width/4, -15.f);
+            this-> sprite.setPosition(this->sprite.getGlobalBounds().left - this->sprite.getGlobalBounds().width/4, -5.f);
         this-> bounceVelocity.y = 5.f;
     }
     //Bottom (GameOver)!!!
@@ -66,6 +67,7 @@ void Ball::initSprite()
     {
         this-> sprite.setPosition(this->sprite.getGlobalBounds().left, target.getSize().y - this->sprite.getGlobalBounds().height);
         this-> bounceVelocity = sf:: Vector2f(0.f, 0.f);
+        this-> ballOnGround = true;
     }
 
     //hits the net from right side
@@ -98,6 +100,16 @@ void Ball::bounce(const sf::RenderTarget& target)
 //    this->sprite.move(bounceSpeed * dirX, bounceSpeed* dirY)
 }
 
+void Ball::serve(int server)
+{
+    //set ball to the server
+    if(server == 1) //server is Jie
+        this-> sprite.setPosition(192.f, 0.f);
+    else
+        this-> sprite.setPosition(1344.f, 0.f);
+    this-> bounceVelocity = sf:: Vector2f(0.f, 3.f);
+}
+
 void Ball::rotate(const sf::RenderTarget &target)
 {
     this->sprite.rotate(this-> rotateAngle);
@@ -105,6 +117,15 @@ void Ball::rotate(const sf::RenderTarget &target)
 
 void Ball:: update(const sf::RenderTarget& target)
 {
+//    this-> serve();
+    if(this-> ballOnGround == true)
+    {
+        if(this-> sprite.getPosition().x < target.getSize().x / 2)
+            this->serve(2);
+        else
+            this->serve(1);
+        this->ballOnGround = false;
+    }
     this->velocityChange(target);
     this->updateWindowBoundsCollision(target);
 //    this->rotate(target);
@@ -125,19 +146,3 @@ sf:: Vector2f Ball:: getPosition()
 
     return this->sprite.getPosition();
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
