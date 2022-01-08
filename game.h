@@ -6,6 +6,7 @@
 #define GAME_H
 #include "player.h"
 #include "ball.h"
+#include "background.h"
 //#include "ball.h"
 #include <SFML/Audio.hpp>
 #include <SFML/Graphics.hpp>
@@ -18,11 +19,13 @@ private:
     Player* playerJie;
     Player* playerCMK;
     Ball* ball;
+    Background* background;
 
     //Private Function
     void initWindow();
     void initPlayer();
     void initBall();
+    void initBackground();
 
 public:
     Game();
@@ -37,8 +40,10 @@ public:
     void update();
     void renderPlayer(sf::RenderTarget& target);
     void renderBall(sf::RenderTarget& target);
+    void renderBackground(sf::RenderTarget &target);
 //    void processKey();
     void render();
+
 
 
 };
