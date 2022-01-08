@@ -8,16 +8,6 @@
 //#include "character.h"
 #include <iostream>
 
-//static const float VIEW_WIDTH = 1280.f;
-//static const float VIEW_HEIGHT = 720.f;
-//
-//void ResizeView(const sf::RenderWindow& target, sf::View& view)
-//{
-//    float aspectRatioX = float(target.getSize().x/ float(target.getSize().y));
-//    float aspectRatioY = float(target.getSize().y/ float(target.getSize().x));
-//    view.setSize(VIEW_WIDTH * aspectRatioX, VIEW_HEIGHT * aspectRatioY);
-//}
-//private functions
 const float windowSizeRatioYtoX = 0.5625;
 
 void Game:: initWindow()
@@ -38,6 +28,11 @@ void Game::initBall()
     this-> ball = new Ball();
 }
 
+void Game::initBackground()
+{
+    this-> background = new Background(*this-> window);
+}
+
 //constructor/ destructor
 Game::Game() {
 
@@ -46,6 +41,8 @@ Game::Game() {
     this-> initPlayer();
 
     this-> initBall();
+
+    this-> initBackground();
 }
 
 Game:: ~Game()
@@ -54,6 +51,7 @@ Game:: ~Game()
     delete this-> playerJie;
     delete this-> playerCMK;
     delete this-> ball;
+    delete this -> background;
 }
 
 
@@ -68,6 +66,13 @@ void Game::run() {
 
 void Game::updatePlayer()
 {
+    //if ball falls on ground, reset player position
+    if(this->ball->ballOnGround == true)
+    {
+        playerJie->reset(1, *this->window);
+        playerCMK->reset(2, *this->window);
+    }
+
     //move playerJie
     if(sf::Keyboard::isKeyPressed(sf::Keyboard::A))
         this->playerJie->move(-1.f, 0.f);
@@ -97,7 +102,7 @@ void Game:: updateBallCollision()
         if(this-> ball->getGlobalBounds().left > this->playerJie->getGlobalBounds().left + this->playerJie->getGlobalBounds().width/2)
         {
             if(this->ball-> getGlobalBounds().top + this->ball->getGlobalBounds().height < this->playerJie->getGlobalBounds().top + this->playerJie->getGlobalBounds().height/2)
-                this-> ball->bounceVelocity = sf::Vector2f(5.f, -5.f);
+                this-> ball->bounceVelocity += sf::Vector2f(1.f, this->playerJie->getJumpspeed());
 
             else
                 this-> ball->bounceVelocity = sf::Vector2f(5.f, 5.f);
@@ -155,6 +160,10 @@ void Game:: updateBallCollision()
 
 void Game:: updateBall()
 {
+//    if(sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
+//    {
+//        this-> ball -> serve();
+//    }
     updateBallCollision();
     this->ball->update(*this->window);
 }
@@ -192,33 +201,20 @@ void Game::renderBall(sf::RenderTarget &target)
     this-> ball-> render(target);
 }
 
+void Game::renderBackground(sf::RenderTarget &target)
+{
+    this-> background->render(target);
+}
+
 void Game::render() {
     this-> window-> clear();
 
     //draw game
 
+    this->renderBackground(*this-> window);
     this-> renderPlayer(*this-> window);
     this-> renderBall(*this-> window);
 
     this-> window-> display();
 }
-
-//處理使用者輸入
-//void Game::processKey() {
-//    sf::Event event;
-//    while (window.pollEvent(event))
-//    {
-//        if (event.type == sf::Event::Closed)
-//            window.close();
-//    }
-
-//    if(sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
-//        sprite.move(-0.1, 0);
-//    if(sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
-//        sprite.move(0.1, 0);
-//    if(sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
-//        sprite.move(0, -0.1);
-//    if(sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
-//        sprite.move(0, 0.1);
-//}
 
