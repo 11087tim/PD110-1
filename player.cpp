@@ -36,16 +36,15 @@ void Player:: initSprite(int character, sf::RenderTarget& target)
     //resize
     this-> sprite.scale(0.3f, 0.3f);
     if(character == 1)
-        this-> sprite.setPosition(target.getSize().x*2/5, target.getSize().y - this->sprite.getGlobalBounds().height);
+        this-> sprite.setPosition(target.getSize().x*1/10, target.getSize().y - this->sprite.getGlobalBounds().height);
     else if(character == 2)
-        this-> sprite.setPosition(target.getSize().x*4/5, target.getSize().y - this->sprite.getGlobalBounds().height);
+        this-> sprite.setPosition(target.getSize().x*7/10, target.getSize().y - this->sprite.getGlobalBounds().height);
 
 }
 
 Player:: Player(int character, sf::RenderTarget& target)
 {
     this-> gravity = .3f;
-    this-> directionY = -1.f;
     this-> movementspeed = 3.f;
     this-> jumpspeed = -5.f;
 
@@ -107,6 +106,8 @@ void Player:: jump()
     this->sprite.move(.0f, this->jumpspeed);
 }
 
+
+
 void Player:: velocityChange(const sf:: RenderTarget& target)
 {
     if(this-> sprite.getPosition().y < target.getSize().y - this->sprite.getGlobalBounds().height && this->sprite.getPosition().y >= target.getSize().y *1/4)
@@ -123,6 +124,14 @@ void Player:: velocityChange(const sf:: RenderTarget& target)
     //initialize variables when back on the ground
     if(this-> sprite.getPosition().y == target.getSize().y - this->sprite.getGlobalBounds().height)
         this-> jumpspeed = -5.f;
+}
+
+void Player:: reset(int character, const sf::RenderTarget& target)
+{
+    if(character == 1)
+        this-> sprite.setPosition(target.getSize().x*1/10, target.getSize().y - this->sprite.getGlobalBounds().height);
+    else if(character == 2)
+        this-> sprite.setPosition(target.getSize().x*7/10, target.getSize().y - this->sprite.getGlobalBounds().height);
 }
 
 void Player:: update(const sf::RenderTarget& target)
@@ -147,6 +156,9 @@ sf::Vector2f Player::getPosition()
     return this->sprite.getPosition();
 }
 
+float Player::getJumpspeed() {
+    return this->jumpspeed;
+}
 
 
 
