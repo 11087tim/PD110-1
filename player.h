@@ -30,11 +30,14 @@ public:
     //functions
     sf:: FloatRect getGlobalBounds();
     sf::Vector2f getPosition();
+    float getJumpspeed();
     void move(const float dirX, const float dirY);
     void jump();
     void velocityChange(const sf:: RenderTarget& target);
     void updateWindowBoundCollision(const sf::RenderTarget& target);
+    void reset(int character, const sf::RenderTarget& target);
     void update(const sf:: RenderTarget& target);
     void render(sf::RenderTarget& target);
+
 };
 #endif //HELLOSFML_PLAYER_H
