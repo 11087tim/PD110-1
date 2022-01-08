@@ -23,6 +23,7 @@ public:
     sf:: Vector2f bounceVelocity;
     float gravity;
     float rotateAngle;
+    bool ballOnGround;
     sf::FloatRect getGlobalBounds();
     sf::Vector2f getPosition();
 
@@ -33,12 +34,13 @@ public:
     void updateWindowBoundsCollision(const sf::RenderTarget& target);
     void velocityChange(const sf::RenderTarget& target);
     void bounce(const sf::RenderTarget& target);
+    void serve(int server);
     void rotate(const sf::RenderTarget& target);
     void update(const sf::RenderTarget& target);
     void render(sf::RenderTarget& target);
 
 
+
 };
 
 #endif BALL_H
-
