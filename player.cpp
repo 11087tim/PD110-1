@@ -6,7 +6,7 @@ void Player:: initTexture(int character)
     switch(character)
     {
         case 1: //jie
-            if(!this->texture->loadFromFile("jie.png"))
+            if(!this->texture->loadFromFile("Jie.png"))
             {
                 std::cout << " ERROR: Load PLAYER JIE image fail.";
             }
@@ -99,11 +99,6 @@ void Player::updateWindowBoundCollision(const sf::RenderTarget* target)
 }
 
 
-void Player:: jump()
-{
-    this->jumpSpeed = -5.f;
-    this->sprite->move(.0f, this->jumpSpeed);
-}
 
 float Player::getJumpSpeed() {
     return this->jumpSpeed;
@@ -114,12 +109,12 @@ void Player:: velocityChange(const sf:: RenderTarget* target)
     if(this-> sprite->getPosition().y < target->getSize().y - this->sprite->getGlobalBounds().height && this->sprite->getPosition().y >= target->getSize().y *1/4)
     {
         this->sprite->move(.0f, this->jumpSpeed);
-        jumpSpeed += gravity;
+        this-> jumpSpeed += gravity;
     }
     if(this->sprite->getPosition().y < target->getSize().y *1/4)
     {
         this->sprite->move(.0f, this->jumpSpeed);
-        jumpSpeed += 2*gravity;
+        this-> jumpSpeed += 2*gravity;
     }
 
     //initialize variables when back on the ground
@@ -133,16 +128,44 @@ void Player:: reset(int character, const sf::RenderTarget* target)
         this-> sprite->setPosition(target->getSize().x*1/10, target->getSize().y - this->sprite->getGlobalBounds().height);
     else if(character == 2)
         this-> sprite->setPosition(target->getSize().x*7/10, target->getSize().y - this->sprite->getGlobalBounds().height);
+
 }
 
+void Player:: jump(){
+    this->jumpSpeed = -5.f;
+    this->sprite->move(.0f, this->jumpSpeed);
+}
 
+void Player:: move(const float dir_x, const float dir_y){
+    this->sprite->move(dir_x * this->movementSpeed , dir_y * this->movementSpeed );
+}
 
 void Player:: update(const float& dt, const sf::RenderTarget* target)
 {
     this->updateWindowBoundCollision(target);
     this->velocityChange(target);
     // control movement
-    Entity::update(this->character, dt);
+    if(character == 1) {
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) {
+            this->jump();
+        }
+        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) {
+            this->move( -1.f, 0.f);
+        } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) {
+            this->move( 1.f, 0.f);
+        }
+    }
+    else{
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
+            this->jump();
+        }
+        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
+            this->move(-1.f, 0.f);
+        } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
+            this->move(1.f, 0.f);
+        }
+
+    }
 }
 
 
@@ -156,6 +179,8 @@ sf::Vector2f Player::getPosition()
     return this->sprite->getPosition();
 }
 
-
+void Player::render(sf::RenderTarget* target){
+    target->draw(*sprite);
+}
 
 
