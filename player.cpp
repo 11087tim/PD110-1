@@ -1,27 +1,21 @@
-//
-// Created by Nina on 2022/1/2.
-//
-
 #include "player.h"
-#include <SFML/Graphics.hpp>
-#include <SFML/System.hpp>
-#include<iostream>
 
 void Player:: initTexture(int character)
-{
+{   texture = new sf::Texture;
     //load texture
     switch(character)
     {
         case 1: //jie
-            if(!this->texture.loadFromFile("/Users/nina/Desktop/C++practice/Game/texture/jie.png"))
+            if(!this->texture->loadFromFile("jie.png"))
             {
-                std::cout << " ERROR: Load PLAYER image fail.";
+                std::cout << " ERROR: Load PLAYER JIE image fail.";
             }
             break;
+
         case 2: //cmK
-            if(!this->texture.loadFromFile("/Users/nina/Desktop/C++practice/Game/texture/cmKuan.png"))
+            if(!this->texture->loadFromFile("cmKuan.png"))
             {
-                std::cout << " ERROR: Load PLAYER image fail.";
+                std::cout << " ERROR: Load PLAYER KUAN image fail.";
             }
             break;
     }
@@ -29,52 +23,61 @@ void Player:: initTexture(int character)
 
 }
 
-void Player:: initSprite(int character, sf::RenderTarget& target)
+void Player:: initSprite(int character, sf::RenderTarget* target)
 {
-    this-> sprite.setTexture(this->texture);
+    sprite = new sf:: Sprite;
+    this-> sprite->setTexture(*texture);
 
     //resize
-    this-> sprite.scale(0.3f, 0.3f);
+    this-> sprite->scale(0.3f, 0.3f);
+
+    // set player position
     if(character == 1)
-        this-> sprite.setPosition(target.getSize().x*1/10, target.getSize().y - this->sprite.getGlobalBounds().height);
+        this-> sprite->setPosition(target->getSize().x*1/10, target->getSize().y - this->sprite->getGlobalBounds().height);
     else if(character == 2)
-        this-> sprite.setPosition(target.getSize().x*7/10, target.getSize().y - this->sprite.getGlobalBounds().height);
+        this-> sprite->setPosition(target->getSize().x*7/10, target->getSize().y - this->sprite->getGlobalBounds().height);
 
 }
 
-Player:: Player(int character, sf::RenderTarget& target)
+// constructor
+Player:: Player(int character, sf::RenderTarget* target)
 {
     this-> gravity = .3f;
-    this-> movementspeed = 3.f;
-    this-> jumpspeed = -5.f;
+    this-> movementSpeed = 3.f;
+    this-> jumpSpeed = -5.f;
 
     this-> character = character;
 
     this-> initTexture(character);
+    std::cout << "inittexture good" << "\n";
     this-> initSprite(character, target);
+    std::cout << "initSprite good" << "\n";
 }
 
+// destructor
 Player:: ~Player()
 {
 
 }
 
-//funtions
+// functions
+
 const bool Player::checkCollision() {
     return 0;
 }
 
-
-void Player::updateWindowBoundCollision(const sf::RenderTarget& target)
+// update Collision
+void Player::updateWindowBoundCollision(const sf::RenderTarget* target)
 {
     if(this-> character == 1) //bounds collision for jie
     {
         //Left
-        if(this->sprite.getGlobalBounds().left <= 0.f)
-            this-> sprite.setPosition(0.f, this->sprite.getGlobalBounds().top);
-            //Right
-        else if(this->sprite.getGlobalBounds().left + this->sprite.getGlobalBounds().width >= target.getSize().x/2)
-            this-> sprite.setPosition(target.getSize().x/2 - this->sprite.getGlobalBounds().width, this->sprite.getGlobalBounds().top);
+        if(this->sprite->getGlobalBounds().left <= 0.f)
+            this-> sprite->setPosition(0.f, this->sprite->getGlobalBounds().top);
+
+        //Right
+        else if(this->sprite->getGlobalBounds().left + this->sprite->getGlobalBounds().width >= target->getSize().x/2)
+            this-> sprite->setPosition(target->getSize().x/2 - this->sprite->getGlobalBounds().width, this->sprite->getGlobalBounds().top);
 //        Top
 
         //Bottom
@@ -83,82 +86,76 @@ void Player::updateWindowBoundCollision(const sf::RenderTarget& target)
     }
     else if(this-> character == 2)//bounds collision for CMK
     {
-        if(this->sprite.getGlobalBounds().left <= target.getSize().x/2)
-            this-> sprite.setPosition(target.getSize().x/2, this->sprite.getGlobalBounds().top);
+        if(this->sprite->getGlobalBounds().left <= target->getSize().x/2)
+            this-> sprite->setPosition(target->getSize().x/2, this->sprite->getGlobalBounds().top);
             //Right
-        else if(this->sprite.getGlobalBounds().left + this->sprite.getGlobalBounds().width >= target.getSize().x)
-            this-> sprite.setPosition(target.getSize().x - this->sprite.getGlobalBounds().width, this->sprite.getGlobalBounds().top);
+        else if(this->sprite->getGlobalBounds().left + this->sprite->getGlobalBounds().width >= target->getSize().x)
+            this-> sprite->setPosition(target->getSize().x - this->sprite->getGlobalBounds().width, this->sprite->getGlobalBounds().top);
     }
 
-    if(this->sprite.getGlobalBounds().top <= 0.f)
-        this-> sprite.setPosition(this->sprite.getGlobalBounds().left, 0.f);
-    
+    if(this->sprite->getGlobalBounds().top <= 0.f)
+        this-> sprite->setPosition(this->sprite->getGlobalBounds().left, 0.f);
+
 }
 
-void Player::move(const float dirX, const float dirY)
-{
-    this->sprite.move(this->movementspeed * dirX, this-> movementspeed * dirY);
-}
 
 void Player:: jump()
 {
-    this->jumpspeed = -5.f;
-    this->sprite.move(.0f, this->jumpspeed);
+    this->jumpSpeed = -5.f;
+    this->sprite->move(.0f, this->jumpSpeed);
 }
 
+float Player::getJumpSpeed() {
+    return this->jumpSpeed;
+}
 
-
-void Player:: velocityChange(const sf:: RenderTarget& target)
+void Player:: velocityChange(const sf:: RenderTarget* target)
 {
-    if(this-> sprite.getPosition().y < target.getSize().y - this->sprite.getGlobalBounds().height && this->sprite.getPosition().y >= target.getSize().y *1/4)
+    if(this-> sprite->getPosition().y < target->getSize().y - this->sprite->getGlobalBounds().height && this->sprite->getPosition().y >= target->getSize().y *1/4)
     {
-        this->sprite.move(.0f, this->jumpspeed);
-        jumpspeed += gravity;
+        this->sprite->move(.0f, this->jumpSpeed);
+        jumpSpeed += gravity;
     }
-    if(this->sprite.getPosition().y < target.getSize().y *1/4)
+    if(this->sprite->getPosition().y < target->getSize().y *1/4)
     {
-        this->sprite.move(.0f, this->jumpspeed);
-        jumpspeed += 2*gravity;
+        this->sprite->move(.0f, this->jumpSpeed);
+        jumpSpeed += 2*gravity;
     }
 
     //initialize variables when back on the ground
-    if(this-> sprite.getPosition().y == target.getSize().y - this->sprite.getGlobalBounds().height)
-        this-> jumpspeed = -5.f;
+    if(this-> sprite->getPosition().y == target->getSize().y - this->sprite->getGlobalBounds().height)
+        this-> jumpSpeed = -5.f;
 }
 
-void Player:: reset(int character, const sf::RenderTarget& target)
+void Player:: reset(int character, const sf::RenderTarget* target)
 {
     if(character == 1)
-        this-> sprite.setPosition(target.getSize().x*1/10, target.getSize().y - this->sprite.getGlobalBounds().height);
+        this-> sprite->setPosition(target->getSize().x*1/10, target->getSize().y - this->sprite->getGlobalBounds().height);
     else if(character == 2)
-        this-> sprite.setPosition(target.getSize().x*7/10, target.getSize().y - this->sprite.getGlobalBounds().height);
+        this-> sprite->setPosition(target->getSize().x*7/10, target->getSize().y - this->sprite->getGlobalBounds().height);
 }
 
-void Player:: update(const sf::RenderTarget& target)
+
+
+void Player:: update(const float& dt, const sf::RenderTarget* target)
 {
     this->updateWindowBoundCollision(target);
     this->velocityChange(target);
-}
-
-void Player:: render(sf::RenderTarget& target)
-{
-    target.draw(this-> sprite);
+    // control movement
+    Entity::update(this->character, dt);
 }
 
 
 sf::FloatRect Player::getGlobalBounds()
 {
-    return this-> sprite.getGlobalBounds();
+    return this-> sprite->getGlobalBounds();
 }
 
 sf::Vector2f Player::getPosition()
 {
-    return this->sprite.getPosition();
+    return this->sprite->getPosition();
 }
 
-float Player::getJumpspeed() {
-    return this->jumpspeed;
-}
 
 
 
