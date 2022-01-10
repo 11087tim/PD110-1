@@ -16,11 +16,6 @@
 
 class Entity {
 protected:
-    //variable
-    sf::Sprite* sprite ;
-    sf::Texture* texture;
-
-    float movementSpeed;
 
 
 public:
@@ -32,6 +27,7 @@ public:
 
     // functions
     void move(int character, const float& dt, const float dir_x, const float dir_y);
+    void jump();
     void update(int character, const float& dt);
     void render(sf::RenderTarget* target);
 
