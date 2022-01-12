@@ -6,21 +6,19 @@ void Player:: initTexture(int character)
     switch(character)
     {
         case 1: //jie
-            if(!this->texture->loadFromFile("Jie.png"))
+            if(!this->texture->loadFromFile("/Users/nina/Desktop/C++practice/Game/texture/jie.png"))
             {
                 std::cout << " ERROR: Load PLAYER JIE image fail.";
             }
             break;
 
         case 2: //cmK
-            if(!this->texture->loadFromFile("cmKuan.png"))
+            if(!this->texture->loadFromFile("/Users/nina/Desktop/C++practice/Game/texture/cmKuan.png"))
             {
                 std::cout << " ERROR: Load PLAYER KUAN image fail.";
             }
             break;
     }
-
-
 }
 
 void Player:: initSprite(int character, sf::RenderTarget* target)
@@ -29,22 +27,22 @@ void Player:: initSprite(int character, sf::RenderTarget* target)
     this-> sprite->setTexture(*texture);
 
     //resize
-    this-> sprite->scale(0.3f, 0.3f);
+    this-> sprite->scale(0.4f, 0.4f);
 
     // set player position
     if(character == 1)
         this-> sprite->setPosition(target->getSize().x*1/10, target->getSize().y - this->sprite->getGlobalBounds().height);
     else if(character == 2)
         this-> sprite->setPosition(target->getSize().x*7/10, target->getSize().y - this->sprite->getGlobalBounds().height);
-
 }
 
 // constructor
 Player:: Player(int character, sf::RenderTarget* target)
 {
     this-> gravity = .3f;
-    this-> movementSpeed = 3.f;
+    this-> movementSpeed = 5.f;
     this-> jumpSpeed = -5.f;
+    this->isjumping = false;
 
     this-> character = character;
 
@@ -75,14 +73,9 @@ void Player::updateWindowBoundCollision(const sf::RenderTarget* target)
         if(this->sprite->getGlobalBounds().left <= 0.f)
             this-> sprite->setPosition(0.f, this->sprite->getGlobalBounds().top);
 
-        //Right
+            //Right
         else if(this->sprite->getGlobalBounds().left + this->sprite->getGlobalBounds().width >= target->getSize().x/2)
             this-> sprite->setPosition(target->getSize().x/2 - this->sprite->getGlobalBounds().width, this->sprite->getGlobalBounds().top);
-//        Top
-
-        //Bottom
-//    else if(this->sprite.getGlobalBounds().left + this->sprite.getGlobalBounds().top + this->sprite.getGlobalBounds().height >= target.getSize().y)
-//        this-> sprite.setPosition(this->sprite.getGlobalBounds().left, target.getSize().y - this->sprite.getGlobalBounds().height);
     }
     else if(this-> character == 2)//bounds collision for CMK
     {
@@ -98,11 +91,29 @@ void Player::updateWindowBoundCollision(const sf::RenderTarget* target)
 
 }
 
+//if counter enemy, move along with enemy
+void Player::counterEnemy(float enemyPosX, float enemyPosY, float enemyWidth, sf::RenderTarget* target) {
 
+    if(this->sprite->getPosition().y + this->sprite->getGlobalBounds().height > enemyPosY)
+    {
+        if(this->sprite->getPosition().x + this->sprite->getGlobalBounds().width < enemyPosX + enemyWidth/2)
+            this->sprite->setPosition(enemyPosX - this->sprite->getGlobalBounds().width, this->sprite->getPosition().y);
+        else if(this->sprite->getPosition().x > enemyPosX + enemyWidth/2)
+            this->sprite ->setPosition(enemyPosX + enemyWidth, this->sprite->getPosition().y);
+//        else
+//            this->sprite ->setPosition(this->sprite->getPosition().x, enemyPosY - this->sprite->getGlobalBounds().height);
+    }
+    else
+    {
+        if(this->sprite->getPosition().x < enemyPosX + enemyWidth/2)
+            this->sprite->setPosition(this->sprite->getPosition().x, enemyPosY - this->sprite->getGlobalBounds().height);
+        else if(this->sprite->getPosition().x > enemyPosX + enemyWidth/2)
+            this->sprite ->setPosition(this->sprite->getPosition().x, enemyPosY - this->sprite->getGlobalBounds().height);
+    }
 
-float Player::getJumpSpeed() {
-    return this->jumpSpeed;
+    this->updateWindowBoundCollision(target);
 }
+
 
 void Player:: velocityChange(const sf:: RenderTarget* target)
 {
@@ -148,15 +159,17 @@ void Player:: update(const float& dt, const sf::RenderTarget* target)
     if(character == 1) {
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) {
             this->jump();
+//            this-> isjumping = true;
         }
         else if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) {
             this->move( -1.f, 0.f);
         } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) {
-            this->move( 1.f, 0.f);
+            this->move(1.f, 0.f);
         }
     }
     else{
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
+//            this->isjumping = true;
             this->jump();
         }
         else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
@@ -164,12 +177,18 @@ void Player:: update(const float& dt, const sf::RenderTarget* target)
         } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
             this->move(1.f, 0.f);
         }
-
     }
+
+//    if(this->sprite->getGlobalBounds().top + this->sprite->getGlobalBounds().height <= target->getSize().y)
+//        this->isjumping = false;
+}
+
+void Player::render(sf::RenderTarget* target){
+    target->draw(*sprite);
 }
 
 
-sf::FloatRect Player::getGlobalBounds()
+sf::Rect<float> Player::getGlobalBounds()
 {
     return this-> sprite->getGlobalBounds();
 }
@@ -179,8 +198,6 @@ sf::Vector2f Player::getPosition()
     return this->sprite->getPosition();
 }
 
-void Player::render(sf::RenderTarget* target){
-    target->draw(*sprite);
+float Player::getJumpSpeed() {
+    return this->jumpSpeed;
 }
-
-
