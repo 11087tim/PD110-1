@@ -1,4 +1,12 @@
+//
+// Created by Nina on 2022/1/10.
+//
+
 #include "GameState.h"
+const float hitBallVrate = 3.5f;
+const float smashBallVrate = 6.f;
+const sf::Vector2f hitBallVelocity = sf::Vector2f(3.f, 2.5f);
+const sf::Vector2f smashBallVelocity = sf::Vector2f(1.f, 3.f);
 
 void GameState::initCharacter() {
     this->playerJie = new Player(1, this->window);
@@ -6,9 +14,14 @@ void GameState::initCharacter() {
 
 }
 
+void GameState::initEnemies() {
+    this->enemyGirl = new Enemies(1, this->window);
+    this->enemyTYW = new Enemies(2, this->window);
+}
+
 void GameState::initTexture() {
     //load texture
-    if(!this->texture.loadFromFile("background.png"))
+    if(!this->texture.loadFromFile("/Users/nina/Desktop/C++practice/Game/texture/background.png"))
     {
         std::cout << " ERROR: Load BACKGROUND image fail.";
     }
@@ -38,16 +51,18 @@ void GameState::initBall(){
 
 GameState::GameState(sf::RenderWindow* window, std:: stack<State*>* states): State(window, states)  // constructor
 {
-        this-> initBackGround();
-        this-> initBall();
-        this->initCharacter();
-
-        std::cout << "gameState is create. " << "\n";
+    this-> initBackGround();
+    this-> initBall();
+    this->initCharacter();
+    this->initEnemies();
+    std::cout << "gameState is create. " << "\n";
 }
 GameState::~GameState(){  // destructor
     delete this-> playerJie;
     delete this-> playerCMK;
     delete this-> ball;
+    delete this-> enemyGirl;
+    delete this-> enemyTYW;
 
 }
 
@@ -67,85 +82,182 @@ void GameState::updatePlayer() {
     {
         playerJie->reset(1, this->window);
         playerCMK->reset(2, this->window);
+
+    }
+    this->updatePlayerEnemiesCollision(this->window);
+
+}
+
+void GameState:: updateEnemy()
+{
+    if(this->ball->ballOnGround == true)
+    {
+        enemyGirl->reset(1, this->window);
+        enemyTYW->reset(2, this->window);
+    }
+}
+
+//Player and Enemies counter
+void GameState::updatePlayerEnemiesCollision(sf:: RenderTarget* target) {
+
+    if(this-> enemyGirl->getGlobalBounds().intersects(this->playerJie->getGlobalBounds()))
+    {
+        this->playerJie->counterEnemy(this->enemyGirl->getPosition().x, this->enemyGirl->getPosition().y, this->enemyGirl->getGlobalBounds().width, this->window);
+//        this->playerJie->move(this->enemyGirl->getDir(), 0.f);
+    }
+
+    if (this->enemyTYW->getGlobalBounds().intersects(this->playerCMK->getGlobalBounds()))
+    {
+        this->playerCMK->counterEnemy(this->enemyTYW->getPosition().x, this->enemyTYW->getPosition().y, this->enemyTYW->getGlobalBounds().width, this->window);
+//        this->playerCMK->move(this->enemyTYW->getDir(), 0.f);
+    }
+}
+
+void GameState:: checkSmash(int character)
+{
+    switch(character)
+    {
+        case 1:
+            if(sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
+                this->ball->bounceVelocity.y *= smashBallVrate;
+            break;
+        case 2:
+            if(sf::Keyboard::isKeyPressed(sf::Keyboard::Enter))
+                this->ball->bounceVelocity.y *= smashBallVrate;
+            break;
     }
 
 }
 
-void GameState:: updateBallCollision()
+void GameState:: updateBallPlayerCollision()
 {
-//    float hitYpos = .0f; //record where the player hits ball
-    if(this-> ball->getGlobalBounds().intersects(this->playerJie->getGlobalBounds()))
-    {
-//        hitYpos =
-        if(this-> ball->getGlobalBounds().left > this->playerJie->getGlobalBounds().left + this->playerJie->getGlobalBounds().width/2)
-        {
-            if(this->ball-> getGlobalBounds().top + this->ball->getGlobalBounds().height < this->playerJie->getGlobalBounds().top + this->playerJie->getGlobalBounds().height/2)
-                this-> ball->bounceVelocity += sf::Vector2f(1.f, this->playerJie->getJumpSpeed());
+    sf::Rect<float> ballGlobalBounds = this->ball->getGlobalBounds();
+    sf::Rect<float> playerGlobalBounds;
+    bool intersect = false;
 
+    if(ballGlobalBounds.intersects(this->playerJie->getGlobalBounds()))
+    {
+        playerGlobalBounds = this->playerJie->getGlobalBounds();
+        intersect = true;
+        if(ballGlobalBounds.left > playerGlobalBounds.left + playerGlobalBounds.width * 0.6)
+        {
+            if(ballGlobalBounds.top + ballGlobalBounds.height < playerGlobalBounds.top + playerGlobalBounds.height/2)
+            {
+                this-> ball->bounceVelocity = sf::Vector2f(hitBallVelocity.x, - hitBallVelocity.y);
+                this->checkSmash(1);
+            }
             else
-                this-> ball->bounceVelocity = sf::Vector2f(5.f, 5.f);
+            {
+                this-> ball->bounceVelocity = hitBallVelocity;
+                this->checkSmash(1);
+            }
 //            this-> ball->rotateAngle = 0.5f;
         }
 
-        else
+        else if(ballGlobalBounds.left + ballGlobalBounds.width < playerGlobalBounds.left + playerGlobalBounds.width * 0.2)
         {
-            if(this->ball-> getGlobalBounds().top + this->ball->getGlobalBounds().height < this->playerJie->getGlobalBounds().top + this->playerJie->getGlobalBounds().height/2)
-                this-> ball->bounceVelocity = sf::Vector2f(-5.f, -5.f);
+            if(ballGlobalBounds.top + ballGlobalBounds.height < playerGlobalBounds.top + playerGlobalBounds.height/2)
+            {
+                this-> ball->bounceVelocity = -hitBallVelocity;
+                this->checkSmash(1);
+            }
+
             else
-                this-> ball->bounceVelocity = sf::Vector2f(-5.f, 5.f);
+            {
+                this-> ball->bounceVelocity = sf::Vector2f(-hitBallVelocity.x, hitBallVelocity.y);
+                this->checkSmash(1);
+            }
+
 //            this-> ball->rotateAngle = -0.5f;
         }
-
-        //when hit ball bounces faster
-        this-> ball-> bounceVelocity.y *= 2.5;
-        //change gravity according to position where player hits ball
-        if(this->ball->getPosition().y - this->playerJie->getPosition().y > 50.f)
-            this-> ball-> bounceVelocity.y += this-> ball-> gravity * 1.2;
-    }
-
-    if(this-> ball->getGlobalBounds().intersects(this->playerCMK->getGlobalBounds()))
-    {
-        if(this-> ball->getGlobalBounds().left > this->playerCMK->getGlobalBounds().left + this->playerCMK->getGlobalBounds().width/2)
+        else if(ballGlobalBounds.left + ballGlobalBounds.width < playerGlobalBounds.left + playerGlobalBounds.width * 0.4
+                && ballGlobalBounds.left + ballGlobalBounds.width > playerGlobalBounds.left + playerGlobalBounds.width * 0.2)
         {
-            if(this->ball-> getGlobalBounds().top + this->ball->getGlobalBounds().height < this->playerCMK->getGlobalBounds().top + this->playerCMK->getGlobalBounds().height/2)
-                this-> ball->bounceVelocity = sf::Vector2f(5.f, -5.f);
-            else
-                this-> ball->bounceVelocity = sf::Vector2f(5.f, 5.f);
-//            this-> ball->rotateAngle = 0.5f;
+            this->ball->bounceVelocity = sf::Vector2f(-hitBallVelocity.x * 0.5, -hitBallVelocity.y);
+            this->checkSmash(1);
         }
-
         else
         {
-            if(this->ball-> getGlobalBounds().top + this->ball->getGlobalBounds().height < this->playerCMK->getGlobalBounds().top + this->playerCMK->getGlobalBounds().height/2)
-                this-> ball->bounceVelocity = sf::Vector2f(-5.f, -5.f);
+            this->ball->bounceVelocity = sf::Vector2f(hitBallVelocity.x * 0.75, -hitBallVelocity.y);
+            this->checkSmash(1);
+        }
+
+
+    }
+    else if(ballGlobalBounds.intersects(this->playerCMK->getGlobalBounds()))
+    {
+        playerGlobalBounds = this->playerCMK->getGlobalBounds();
+        intersect = true;
+        if(ballGlobalBounds.left > playerGlobalBounds.left + playerGlobalBounds.width * 0.8)
+        {
+            if(ballGlobalBounds.top + ballGlobalBounds.height < playerGlobalBounds.top + playerGlobalBounds.height/2)
+            {
+                this-> ball->bounceVelocity = sf::Vector2f(hitBallVelocity.x, - hitBallVelocity.y);
+                this->checkSmash(2);
+            }
+
+
             else
-                this-> ball->bounceVelocity = sf::Vector2f(-5.f, 5.f);
+            {
+                this-> ball->bounceVelocity = hitBallVelocity;
+                this->checkSmash(2);
+            }
+
 //            this-> ball->rotateAngle = 0.5f;
         }
 
-        //when hit ball bounces faster
-        this-> ball-> bounceVelocity.y *= 2.5;
-        //change gravity according to position where player hits ball
-        if(this->ball->getPosition().y - this->playerCMK->getPosition().y > 50.f)
-            this-> ball-> bounceVelocity.y += this-> ball-> gravity * 1.2;
+        else if(ballGlobalBounds.left + ballGlobalBounds.width < playerGlobalBounds.left + playerGlobalBounds.width * 0.6)
+        {
+            if(ballGlobalBounds.top + ballGlobalBounds.height < playerGlobalBounds.top + playerGlobalBounds.height/2)
+            {
+                this-> ball->bounceVelocity = -hitBallVelocity;
+                this->checkSmash(2);
+            }
+
+            else
+            {
+                this-> ball->bounceVelocity = sf::Vector2f(-hitBallVelocity.x, hitBallVelocity.y);
+                this->checkSmash(2);
+            }
+
+//            this-> ball->rotateAngle = -0.5f;
+        }
+        else if(ballGlobalBounds.left + ballGlobalBounds.width < playerGlobalBounds.left + playerGlobalBounds.width * 0.6
+                && ballGlobalBounds.left + ballGlobalBounds.width > playerGlobalBounds.left + playerGlobalBounds.width * 0.2)
+        {
+            this->ball->bounceVelocity = sf::Vector2f(-hitBallVelocity.x * 0.75, -hitBallVelocity.y);
+            this->checkSmash(2);
+        }
+        else
+        {
+            this->ball->bounceVelocity = sf::Vector2f(hitBallVelocity.x * 0.5, -hitBallVelocity.y);
+            this->checkSmash(2);
+        }
     }
+
+    if(intersect)
+        //when hit ball bounces faster
+        this-> ball-> bounceVelocity.y *= hitBallVrate;
 }
 
-void GameState::updateBall() {
+void GameState::updateBall(const float& dt) {
 
-    updateBallCollision();
-    this->ball->update(this->window);
+    updateBallPlayerCollision();
+    this->ball->update(this->window, dt);
 
 }
 
 void GameState::update(const float& dt){
     this->updateMousePosition();
     this-> updateInput(dt);
-    this->ball->update(this->window);
+    this->ball->update(this->window, dt);
     this-> playerJie->update(dt, this-> window);
     this-> playerCMK->update(dt, this->window);
-    this-> updateBall();
+    this-> enemyGirl->update(this->window);
+    this->enemyTYW->update(this->window);
+    this-> updateBall(dt);
     this-> updatePlayer();
+    this-> updateEnemy();
 
 }
 
@@ -158,5 +270,7 @@ void GameState:: render(sf::RenderTarget* target){
     this->ball->render(this->window);
     this->playerJie->render(this->window);
     this->playerCMK->render(this->window);
+    this->enemyGirl->render(this->window);
+    this->enemyTYW->render(this->window);
 
 }
