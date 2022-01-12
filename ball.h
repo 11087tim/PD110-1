@@ -10,7 +10,6 @@ private:
     // variable
     sf::Sprite* sprite;
     sf::Texture* texture;
-    sf::Vector2f serverPos;
 
     // function
     void initTexture();
@@ -23,7 +22,9 @@ public:
     float gravity;
     float rotateAngle;
     bool ballOnGround;
-    sf::FloatRect getGlobalBounds();
+    float _timeElapsed;
+    
+    sf::Rect<float> getGlobalBounds();
     sf::Vector2f getPosition();
 
     Ball();
@@ -35,7 +36,7 @@ public:
     void bounce(const sf::RenderTarget* target);
     void serve(int server);
     void rotate(const sf::RenderTarget* target);
-    void update(const sf::RenderTarget* target);
+    void update(const sf::RenderTarget* target, const float& dt);
     void render(sf::RenderTarget* target);
 
 
