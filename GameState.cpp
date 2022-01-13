@@ -6,7 +6,7 @@
 const float hitBallVrate = 3.5f;
 const float smashBallVrate = 6.f;
 const sf::Vector2f hitBallVelocity = sf::Vector2f(3.f, 2.5f);
-const sf::Vector2f smashBallVelocity = sf::Vector2f(1.f, 3.f);
+const sf::Vector2f smashBallVelocity = sf::Vector2f(15.f, .5f);
 
 void GameState::initCharacter() {
     this->playerJie = new Player(1, this->window);
@@ -119,11 +119,21 @@ void GameState:: checkSmash(int character)
     {
         case 1:
             if(sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
+            {
+                if(this->playerJie->getPosition().y < this->window->getSize().y / 2
+                    && this->ball->getPosition().x > this->playerJie->getGlobalBounds().left + this->playerJie->getGlobalBounds().width / 2)
+                    this->ball->bounceVelocity = smashBallVelocity;
                 this->ball->bounceVelocity.y *= smashBallVrate;
+            }
             break;
         case 2:
             if(sf::Keyboard::isKeyPressed(sf::Keyboard::Enter))
+            {
+                if(this->playerCMK->getPosition().y < this->window->getSize().y / 2
+                    && this->ball->getPosition().x < this->playerCMK->getGlobalBounds().left + this->playerJie->getGlobalBounds().width / 2)
+                    this->ball->bounceVelocity = sf::Vector2f(-smashBallVelocity.x, smashBallVelocity.y);
                 this->ball->bounceVelocity.y *= smashBallVrate;
+            }
             break;
     }
 
